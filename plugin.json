@@ -1,0 +1,22 @@
+{
+  "id": "neodex.echo",
+  "name": "Écho",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Quatre cristaux s'allument dans un ordre de plus en plus long. Rejoue la suite sans te tromper.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "echo",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Jeux",
+  "syncMode": "progression",
+  "syncInfo": "Plus longue suite.",
+  "mobile": false,
+  "system": false,
+  "dependencies": {},
+  "sdk": "2.1.0",
+  "permissions": [
+    "storage"
+  ]
+}
