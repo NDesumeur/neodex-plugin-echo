@@ -3,7 +3,7 @@
   "name": "Écho",
   "version": "1.0.0",
   "author": "NDesumeur",
-  "description": "Quatre cristaux s'allument dans un ordre de plus en plus long. Rejoue la suite sans te tromper.",
+  "description": "Jeu de mémoire : quatre cristaux s'allument dans un ordre précis, chacun avec sa note, et tu rejoues la suite à la souris, aux touches 1 à 4 ou aux flèches. Chaque tour ajoute un cristal et accélère un peu ; une erreur termine la partie et montre le bon cristal. Trois vitesses de départ et un record de plus longue suite.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "echo",
