@@ -16,6 +16,9 @@ A single mistake ends the game: the crystal you should have touched lights up to
 
 - **Click** a crystal.
 - On the keyboard: **1 2 3 4**, or the **arrows** (↑ top, → right, ↓ bottom, ← left).
+- **FULLSCREEN**: the button under the records. Outside fullscreen, the cave takes the whole height of the window.
+
+When a crystal lights up, it swells, rings of light and sparks fly out of it, and the whole cave takes its colour: you see it even from the corner of your eye.
 
 ## Speed
 

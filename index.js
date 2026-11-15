@@ -5,19 +5,21 @@ const HTML = `<div class="appWrap wide">
   <div class="gMain"><div class="gameBox"><canvas id="gc" width="256" height="224"></canvas></div>
     <div class="gSide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="gStats"></div></div>
-      <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button></div>
+      <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button><button class="btn" id="ecFs">PLEIN ÉCRAN</button></div>
       <label class="row">Vitesse <select id="ecSpeed" class="f"><option value="0.8">Calme</option><option value="1">Normale</option><option value="1.4">Rapide</option></select></label>
       <div class="hint">Chaque tour ajoute un cristal à la suite, et elle passe un peu plus vite.</div><div class="hint">Chaque cristal a sa note : écouter aide autant que regarder.</div>
     </div></div>
 </div>`;
 const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
-.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:2;min-width:320px;position:relative}
+.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:2 1 560px;min-width:min(100%,340px);position:relative}
 .gameBox canvas{width:100%;image-rendering:pixelated;cursor:var(--cp,pointer);touch-action:none}
 .gSide{display:flex;flex-direction:column;gap:14px;flex:1;min-width:250px;max-width:420px}
 .gSide .sysCard{display:flex;flex-direction:column}
 .gStats{display:grid;grid-template-columns:1fr auto;gap:4px 14px}
 .gStats b{text-align:right}
-.gameBox canvas{max-width:640px;aspect-ratio:256/224}`;
+.gameBox canvas{width:min(100%,max(300px,calc((100vh - 190px) * 256 / 224)));height:auto;aspect-ratio:256/224}
+.gameBox:fullscreen{padding:0}
+.gameBox:fullscreen canvas{width:min(100vw,calc(100vh * 256 / 224))}`;
 /* ---------- l'habillage pixel art, dessiné à la main : police bitmap (accents compris), cadres, boutons, icônes ----------
    Tout est en pixels pleins, agrandis par 2 sans lissage : aucun dégradé, aucune ombre floue. */
 const PXK = (() => {
@@ -346,18 +348,20 @@ function ecGem(m, l, d, o, lit) {  // un cristal taillé, 37 × 37 : facettes cl
 const EC_GEM = EC_COL.map(([m, l, d, o]) => [ecGem(m, l, d, o, false), ecGem(m, l, d, o, true)]);
 const ecs = gstore('echo', {games: 0, best: 0, speed: 1});
 let ec = null;
-function ecNew() { ec = Object.assign(ec || {tick: 0, raf: 0}, {seen: ec ? ec.tick : 0, mode: 'ready', seq: [], pos: 0, lit: -1, litT: 0, show: 0, wait: 0, overAt: 0}); ecInfo(); }
+function ecNew() { ec = Object.assign(ec || {tick: 0, raf: 0}, {seen: ec ? ec.tick : 0, mode: 'ready', seq: [], pos: 0, lit: -1, litT: 0, litL: 1, sparks: [], show: 0, wait: 0, overAt: 0}); ecInfo(); }
 function ecNext() { ec.seq.push(Math.floor(Math.random() * 4)); ec.mode = 'show'; ec.show = 0; ec.wait = 40; ec.pos = 0; }
-function ecLight(i, t = 18) { ec.lit = i; ec.litT = t; beep(EC_NOTE[i], t / 60, 'triangle', 0, .12); }
+function ecLight(i, t = 18) { ec.lit = i; ec.litT = ec.litL = t; beep(EC_NOTE[i], t / 60, 'triangle', 0, .12);
+  const [x, y] = EC_POS[i]; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2 + Math.random() * .4, v = 1.2 + Math.random() * 1.4; ec.sparks.push({x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 22 + Math.floor(Math.random() * 10), c: EC_COL[i][Math.random() < .5 ? 0 : 1]}); } }
 function ecPress(i) {
   if (ec.mode === 'ready' || ec.mode === 'over') { if (ec.mode === 'over' && ec.tick - ec.overAt < 40) return; ec.seq = []; ecs.games++; saveGames(); return ecNext(); }
   if (ec.mode !== 'input') return;
-  if (ec.seq[ec.pos] !== i) { ec.mode = 'over'; ec.overAt = ec.tick; ec.lit = ec.seq[ec.pos]; ec.litT = 60; beep(110, .5, 'sawtooth', 55, .1); const n = ec.seq.length - 1; if (n > ecs.best) ecs.best = n; best('echo', n); saveGames(); ecInfo(); return; }
+  if (ec.seq[ec.pos] !== i) { ec.mode = 'over'; ec.overAt = ec.tick; ec.lit = ec.seq[ec.pos]; ec.litT = ec.litL = 60; beep(110, .5, 'sawtooth', 55, .1); const n = ec.seq.length - 1; if (n > ecs.best) ecs.best = n; best('echo', n); saveGames(); ecInfo(); return; }
   ecLight(i, 12); ec.pos++;
   if (ec.pos === ec.seq.length) { ec.mode = 'show'; ec.show = ec.seq.length; ec.wait = 50; }
 }
 function ecUpdate() {
   if (ec.litT > 0 && --ec.litT === 0) ec.lit = -1;
+  for (const p of ec.sparks) { p.x += p.vx; p.y += p.vy; p.vx *= .95; p.vy *= .95; p.t--; } ec.sparks = ec.sparks.filter(p => p.t > 0);
   if (ec.mode === 'show') {
     const step = Math.max(10, Math.round((26 - ec.seq.length) / ecs.speed));  // de plus en plus vite
     if (ec.show === ec.seq.length && ec.wait <= 0) { ecNext(); return; }
@@ -373,7 +377,18 @@ const EC_BG = cnv(W, H, b => {  // une grotte de cristal : fond tramé, petites 
 function ecDraw() {
   for (; ec.seen < ec.tick; ec.seen++) ecUpdate();  // l'animation avance à 60 images par seconde, quel que soit l'écran
   g.drawImage(EC_BG, 0, 0);
-  EC_POS.forEach(([x, y], i) => { const on = ec.lit === i; if (on) { g.globalAlpha = .25; for (let k = 0; k < 3; k++) { px(g, EC_COL[i][0], x - 22 - k * 2, y - 2, 44 + k * 4, 4); px(g, EC_COL[i][0], x - 2, y - 22 - k * 2, 4, 44 + k * 4); } g.globalAlpha = 1; } g.drawImage(EC_GEM[i][on ? 1 : 0], x - 18, y - 18); });
+  // la lumière : la grotte prend la couleur du cristal, des anneaux en losange s'éloignent, des rayons en croix, puis le cristal gonfle
+  const L = ec.lit >= 0 ? ec.litT / ec.litL : 0, age = ec.lit >= 0 ? ec.litL - ec.litT : 0;
+  if (ec.lit >= 0) { const [lx, ly] = EC_POS[ec.lit], c = EC_COL[ec.lit][0];
+    g.globalAlpha = .18 * L; g.fillStyle = c; g.beginPath(); g.arc(128, 100, 92, 0, Math.PI * 2); g.fill();
+    for (let k = 0; k < 3; k++) { const r = 20 + ((age * 1.4 + k * 9) % 27); g.globalAlpha = L * (1 - (r - 20) / 27) * .9;
+      for (let d = 0; d < r; d++) { px(g, c, lx + d, ly - r + d, 2, 2); px(g, c, lx + r - d, ly + d, 2, 2); px(g, c, lx - d, ly + r - d, 2, 2); px(g, c, lx - r + d, ly - d, 2, 2); } }
+    g.globalAlpha = .45 * L; for (let k = 0; k < 4; k++) { px(g, c, lx - 30 - k * 3, ly - 1, 60 + k * 6, 3); px(g, c, lx - 1, ly - 30 - k * 3, 3, 60 + k * 6); }
+    g.globalAlpha = 1; }
+  EC_POS.forEach(([x, y], i) => { const on = ec.lit === i, z = on ? 1 + .22 * Math.max(0, 1 - age / 8) : 1, s = Math.round(37 * z);
+    g.drawImage(EC_GEM[i][on ? 1 : 0], Math.round(x - s / 2), Math.round(y - s / 2), s, s);
+    if (on && (age >> 2) % 2 === 0) { px(g, '#ffffff', x - 9, y - 12, 2, 2); px(g, '#ffffff', x + 7, y + 4, 2, 2); } });
+  for (const p of ec.sparks) { g.globalAlpha = Math.min(1, p.t / 12); px(g, p.t > 18 ? '#ffffff' : p.c, p.x, p.y, 2, 2); } g.globalAlpha = 1;
   // au centre : la longueur de la suite, et un petit œil qui dit à qui c'est le tour
   px(g, '#05010b', 112, 88, 33, 25); px(g, '#2a1a4a', 113, 89, 31, 23);
   pxFont(g, String(Math.max(0, ec.mode === 'over' ? ec.seq.length - 1 : ec.seq.length)), 128, 106, '#ffffff', 12, 'center');
@@ -392,11 +407,17 @@ document.addEventListener('keydown', e => {
 function ecInfo() { showStats([['Plus longue suite', ecs.best], ['Parties', ecs.games]]); $('ecSpeed').value = ecs.speed; }
 $('ecSpeed').onchange = () => { ecs.speed = +$('ecSpeed').value; saveGames(); };
 $('gNew').onclick = () => { ecNew(); $('gNew').blur(); };
-{  // vérification : une bonne réponse avance, une mauvaise termine la partie
-  const keep = ec, realBest = ecs.best, realGames = ecs.games, rb = games.best.echo; ec = null; ecNew(); ec.mode = 'input'; ec.seq = [2, 1]; ec.pos = 0; ecPress(2); const ok = ec.pos === 1; ecPress(3); const over = ec.mode === 'over';
-  console.assert(ok && over && ecHit(128, 44) === 0 && ecHit(72, 100) === 3 && ecHit(128, 100) === -1, 'écho');
-  ecs.best = realBest; ecs.games = realGames; if (rb === undefined) delete games.best.echo; else games.best.echo = rb; ec = keep;
+$('ecFs').onclick = () => { $('ecFs').blur(); try { if (document.fullscreenElement) document.exitFullscreen(); else cv.parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
+function ecCheck() {  // vérification : une bonne réponse avance, une mauvaise termine la partie ; un cristal allumé lance ses étincelles
+  const keep = ec, realBest = ecs.best, realGames = ecs.games, rb = games.best.echo, bad = []; ec = null; ecNew(); ec.mode = 'input'; ec.seq = [2, 1]; ec.pos = 0;
+  const vol = actx; actx = {currentTime: 0, createOscillator: () => { throw 0; }};  // sans bruit pendant la vérification
+  ecPress(2); if (ec.pos !== 1 || ec.lit !== 2 || ec.sparks.length !== 12) bad.push('bonne réponse'); ecPress(3); if (ec.mode !== 'over') bad.push('mauvaise réponse');
+  if (!(ecHit(128, 44) === 0 && ecHit(72, 100) === 3 && ecHit(128, 100) === -1)) bad.push('cristaux');
+  actx = vol; ecs.best = realBest; ecs.games = realGames; if (rb === undefined) delete games.best.echo; else games.best.echo = rb; ec = keep;
+  return bad.length ? bad.join(', ') : 'ok';
 }
+{ const c = ecCheck(); console.assert(c === 'ok', 'écho', c); }
+cv.__ec = {st: () => ec, check: ecCheck};
 ctx.onOpen(() => { if (!ec) ecNew(); gameLoop(ec, 'echo', () => {}, ecDraw); ecInfo(); });
 
 }

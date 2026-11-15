@@ -16,6 +16,9 @@ Une seule erreur termine la partie : le cristal qu'il fallait toucher s'allume p
 
 - **Clic** sur un cristal.
 - Au clavier : **1 2 3 4**, ou les **flèches** (↑ haut, → droite, ↓ bas, ← gauche).
+- **PLEIN ÉCRAN** : le bouton sous les records. Hors plein écran, la grotte prend toute la hauteur de la fenêtre.
+
+Quand un cristal s'allume, il gonfle, des anneaux de lumière et des étincelles partent de lui, et toute la grotte prend sa couleur : on le voit même du coin de l'œil.
 
 ## Vitesse
 

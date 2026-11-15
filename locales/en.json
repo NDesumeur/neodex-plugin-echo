@@ -20,7 +20,6 @@
  "Ia": "Ia",
  "Ic": "Ic",
  "Id": "ID",
- "Jeu de mémoire : quatre cristaux s'allument dans un ordre précis, chacun avec sa note, et tu rejoues la suite à la souris, aux touches 1 à 4 ou aux flèches. Chaque tour ajoute un cristal et accélère un peu ; une erreur termine la partie et montre le bon cristal. Trois vitesses de départ et un record de plus longue suite.": "A memory game: four crystals light up in a precise order, each with its own note, and you play the sequence back with the mouse, keys 1 to 4 or the arrows. Each round adds a crystal and speeds up a little; a mistake ends the game and shows the right crystal. Three starting speeds and a longest-sequence record.",
  "KAAKHDDDDDDDKSSK": "KAAKHDDDDDDDKSSK",
  "KAAKHHHHHHHHKSSK": "KAAKHHHHHHHHKSSK",
  "KAAKKKKKKKKKKSSK": "KAAKKKKKKKKKKSSK",
@@ -65,5 +64,7 @@
  "Vitesse": "Speed",
  "ÉCHO": "ECHO",
  "Écho": "Echo",
- "écho": "echo"
+ "écho": "echo",
+ "Jeu de mémoire : quatre cristaux s'allument dans un ordre précis, chacun avec sa note, et tu rejoues la suite à la souris, aux touches 1 à 4 ou aux flèches. Chaque tour ajoute un cristal et accélère un peu ; une erreur termine la partie et montre le bon cristal. Trois vitesses de départ et un record de plus longue suite. Chaque cristal qui s'allume gonfle, lance des étincelles et éclaire la grotte de sa couleur. Le jeu prend la taille de l'écran, plein écran compris.": "A memory game: four crystals light up in a precise order, each with its own note, and you play the sequence back with the mouse, keys 1 to 4 or the arrows. Each round adds a crystal and speeds up a little; a mistake ends the game and shows the right crystal. Three starting speeds and a longest-sequence record. Each crystal that lights up swells, throws sparks and lights the cave in its colour. The game takes the size of your screen, fullscreen included.",
+ "PLEIN ÉCRAN": "FULLSCREEN"
 }
