@@ -68,5 +68,16 @@
  "PLEIN ÉCRAN": "FULLSCREEN",
  "bonne réponse": "right answer",
  "mauvaise réponse": "wrong answer",
- "Rien n'est synchronisé : tes records restent sur cet appareil.": "Nothing is synced: your records stay on this device."
+ "Rien n'est synchronisé : tes records restent sur cet appareil.": "Nothing is synced: your records stay on this device.",
+ "Premier écho": "First echo",
+ "Rejouer une première suite": "Repeat your first sequence",
+ "Bonne oreille": "Good ear",
+ "Rejouer une suite de 10 notes": "Repeat a 10-note sequence",
+ "Mémoire musicale": "Musical memory",
+ "Rejouer une suite de 20 notes": "Repeat a 20-note sequence",
+ "Oreille absolue": "Perfect pitch",
+ "Rejouer une suite de 30 notes": "Repeat a 30-note sequence",
+ "Cristallier": "Crystal keeper",
+ "Jouer 20 parties": "Play 20 games",
+ "notes": "notes"
 }

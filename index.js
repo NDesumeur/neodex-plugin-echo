@@ -299,6 +299,9 @@ export default async function (ctx) {
   const saveGames = () => { clearTimeout(gamesTimer); gamesTimer = setTimeout(() => { gamesTimer = null; folder.write('games', games).catch(() => {}); }, 500); };
   const best = (k, v) => { const b = games.best[k]; if (b == null || v > b) { games.best[k] = v; saveGames(); return true; } return false; };
   const gstore = (k, init) => (games[k] ??= init);
+  // les trophées de NeoDex (3.4.8 et plus) : succès et records déclarés dans plugin.json ; sur un NeoDex plus ancien, rien ne se passe
+  const trophy = id => { ctx.games?.unlock(id).catch(() => {}); };
+  const trophyRecord = (id, v) => { if (v != null && Number.isFinite(+v)) ctx.games?.record(id, +v).catch(() => {}); };
 function gameLoop(st, appKey, update, draw) {
   cancelAnimationFrame(st.raf);
   const STEP = 1000 / 60; let acc = 0, last = performance.now();
@@ -404,7 +407,8 @@ document.addEventListener('keydown', e => {
   if (m !== undefined && !e.repeat) { e.preventDefault(); if (ec.mode === 'input') ecPress(m); }
   if ((e.key === ' ' || e.key === 'Enter') && ec.mode !== 'input' && ec.mode !== 'show') { e.preventDefault(); ecPress(0); }
 });
-function ecInfo() { showStats([['Plus longue suite', ecs.best], ['Parties', ecs.games]]); $('ecSpeed').value = ecs.speed; }
+function ecInfo() {
+  setTimeout(ecTrophies); showStats([['Plus longue suite', ecs.best], ['Parties', ecs.games]]); $('ecSpeed').value = ecs.speed; }
 $('ecSpeed').onchange = () => { ecs.speed = +$('ecSpeed').value; saveGames(); };
 $('gNew').onclick = () => { ecNew(); $('gNew').blur(); };
 $('ecFs').onclick = () => { $('ecFs').blur(); try { if (document.fullscreenElement) document.exitFullscreen(); else cv.parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
@@ -418,6 +422,12 @@ function ecCheck() {  // vérification : une bonne réponse avance, une mauvaise
 }
 { const c = ecCheck(); console.assert(c === 'ok', 'écho', c); }
 cv.__ec = {st: () => ec, check: ecCheck};
+// les trophées, tirés des statistiques et des records gardés (aussi à l'ouverture : ce qui a été fait avant compte)
+function ecTrophies() {
+  const b = ecs.best, sig = [b, ecs.games].join(); if (sig === ecTrophies.sig) return; ecTrophies.sig = sig;
+  trophyRecord('suite', b || null);
+  if (b >= 1) trophy('premier'); if (b >= 10) trophy('s10'); if (b >= 20) trophy('s20'); if (b >= 30) trophy('s30'); if (ecs.games >= 20) trophy('vingt');
+}
 ctx.onOpen(() => { if (!ec) ecNew(); gameLoop(ec, 'echo', () => {}, ecDraw); ecInfo(); });
 
 }
